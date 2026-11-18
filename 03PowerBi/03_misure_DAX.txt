@@ -1,0 +1,34 @@
+// 🧮 Misure DAX – Gatti in rifugio
+// Tabella dati: gatti_powerbi · Tabella date: calendario (relazione calendario[data] → data_ingresso, a livello di data)
+// I nomi delle misure sono diversi dai nomi delle colonne.
+
+Tot Ingressi = COUNTROWS ( gatti_powerbi )
+
+Tot Gatti = DISTINCTCOUNT ( gatti_powerbi[id_gatto] )
+
+Ingressi Con Esito =
+CALCULATE ( [Tot Ingressi], gatti_powerbi[esito] <> "Senza esito registrato" )
+
+Tot Adozioni =
+CALCULATE ( [Tot Ingressi], gatti_powerbi[esito] = "Adozione" )
+
+% Adottati = DIVIDE ( [Tot Adozioni], [Ingressi Con Esito] )
+
+Giorni Attesa Mediana =
+CALCULATE (
+    MEDIAN ( gatti_powerbi[giorni_rifugio] ),
+    gatti_powerbi[esito] = "Adozione"
+)
+
+% Adottati Neri =
+CALCULATE ( [% Adottati], gatti_powerbi[gatto_nero] = TRUE () )
+
+% Adottati Altri Colori =
+CALCULATE ( [% Adottati], gatti_powerbi[gatto_nero] = FALSE () )
+
+Differenza Neri (punti) = ( [% Adottati Neri] - [% Adottati Altri Colori] ) * 100
+
+Tot Trasferimenti =
+CALCULATE ( [Tot Ingressi], gatti_powerbi[esito] = "Trasferimento" )
+
+% Trasferiti = DIVIDE ( [Tot Trasferimenti], [Ingressi Con Esito] )
